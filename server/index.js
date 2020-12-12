@@ -27,34 +27,60 @@ function getRandomInt(min, max) {
 }
 
 const handleRequest = function(req, res) {
-  console.log(`Endpoint: ${req.url} Method: ${req.method}`);
 
   // redirect users to /quote if they try to hit the homepage. This should already work, no changes needed
   if (req.url == '/') {
-    console.log('redirecting');
+    // if url is blank
+   // console.log('redirecting');
     res.writeHead(301, {...headers, Location: `http://localhost:${port}/quote`}) //redirect to quote
+    // redirects the user to the appropriate '/quote' page
     res.end();
+    // tells server request is over
   }
 
   // TODO: GET ONE
-  if ((req.url == '/quote/' || req.url == '/quote') && req.method == "FILL ME IN") {
+  if ((req.url == '/quote/' || req.url == '/quote') && req.method == "GET") {
     //YOUR CODE HERE
-
+    res.writeHead(200, headers);
+    // sets CORS requests
+    res.write(quotes[getRandomInt(0, quotes.length)])
+    // putting random quote on page
+    res.end();
+    // telling server this message call is over
   }
   // TODO: POST/CREATE
-  else if ((req.url == 'FILL ME IN' || req.url == 'FILL ME IN') && req.method == "FILL ME IN") {
-    //YOUR CODE HERE
+  else if ((req.url == '/quote/' || req.url == '/quote') && req.method == "POST") {
+    // checks if url is good and method is a POST
+    let body = '';
+    // sets empty string to body var
+    req.on('data', function(chunk) {
+      // when request hits 'data' it calls the callback function and passes the data to the callback function as CHUNK
+      body+= chunk;
+      // add CHUNK to the body string
+      quotes.push(body)
+      // pushes that body string to the quotes aray
+    })
+    req.on('end', function () {
+      // when request hits 'end' the cb function will be called
+      req.writeHead(200, headers)
+      // set headers
+      req.end();
+      // tell server request is done
+    })
   }
 
 //CATCH ALL ROUTE
   else {
     res.writeHead(404,headers);
+    // gives error headers
     res.end('Page not found');
+    // displays error message
 
   }
 }
 
 const server = http.createServer(handleRequest);
+
 server.listen(port);
 
 console.log('Server is running in the terminal!');
